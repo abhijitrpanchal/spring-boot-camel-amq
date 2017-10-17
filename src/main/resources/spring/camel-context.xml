@@ -3,30 +3,19 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
     <!-- Camel Routes -->
     <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
-        <!--
-          A route to generate a random order every 5th second.
-
-          When this route is started, it will automatically send xml messages to the JMS queue incomingOrders on the
-          ActiveMQ broker.
-
-          The <log/> elements are used to add human-friendly business logging statements. They make it easier to see what the
-          route is doing.
-
-          The amq component ensures to use the broker in the kubernetes cluster.
-        -->
-        <route id="generate-order-route" streamCache="true">
+        <route id="send-emp-details" streamCache="true">
             <from id="route-timer" uri="timer:order?period=3000"/>
-            <log id="route-log-order" message=""/>
-             <to id="route-to-incoming-orders" uri="restlet:http://simple-employee-details-leanarchdemo.apps.dev.openshift.opentlc.com?restletMethod=get"/>
-             <to id="route-to-incoming-orders" uri="amq:incomingOrders"/>
+            <log id="route-log-order" message="Started Processing"/>
+             <to id="route-to-empdetails" uri="restlet:http://simple-employee-details-leanarchdemo.apps.dev.openshift.opentlc.com?restletMethod=get"/>
+             <to id="route-to-employeequeue" uri="amq:employeequeue"/>
         </route>
         <!--
-          This route consumes messages from the JMS queue incomingOrders on the ActiveMQ broker within the ESB.
+          This route sends records from employee details service to employee time records service
         -->
-        <route id="jms-cbr-route" streamCache="true">
-            <from id="route-from-incoming-orders" uri="amq:incomingOrders"/>
-            <to id="route-to-incoming-orders" uri="restlet:http://simple-emp-timerecords-leanarchdemo.apps.dev.openshift.opentlc.com?restletMethod=get"/>
-            <log id="route-final-log" message="Done processing ${file:name}"/>
+        <route id="get-emp-details" streamCache="true">
+            <from id="route-from-employeequeue" uri="amq:employeequeue"/>
+            <to id="route-to-emptimerecords" uri="restlet:http://simple-emp-timerecords-leanarchdemo.apps.dev.openshift.opentlc.com?restletMethod=get"/>
+            <log id="route-final-log" message="Done processing"/>
         </route>
     </camelContext>
 </beans>
