@@ -6,7 +6,7 @@
         <route id="send-emp-details" streamCache="true">
             <from id="route-timer" uri="timer:order?period=3000"/>
             <log id="route-log-order" message="Started Processing"/>
-             <to id="route-to-empdetails" uri="restlet:http://simple-employee-details-leanarchdemo.apps.dev.openshift.opentlc.com?restletMethod=get"/>
+             <to id="route-to-empdetails" uri="restlet:http://simple-employee-details-leanarchdemo.apps.dev.openshift.opentlc.com/employees?restletMethod=get"/>
              <to id="route-to-employeequeue" uri="amq:employeequeue"/>
         </route>
         <!--
