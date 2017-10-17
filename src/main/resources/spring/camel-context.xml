@@ -5,16 +5,20 @@
     <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
         <route id="send-emp-details" streamCache="true">
             <from id="route-timer" uri="timer:order?period=3000"/>
-            <log id="route-log-order" message="Started Processing"/>
+            <log id="route-log-1" message="Started Processing"/>
              <to id="route-to-empdetails" uri="restlet:http://simple-employee-details-leanarchdemo.apps.dev.openshift.opentlc.com/employees?restletMethod=get"/>
+            <log id="route-log-2" message="emp-details connected"/>
              <to id="route-to-employeequeue" uri="amq:employeequeue"/>
+            <log id="route-log-3" message="data sent to employeequeue"/>
         </route>
         <!--
           This route sends records from employee details service to employee time records service
         -->
         <route id="get-emp-details" streamCache="true">
             <from id="route-from-employeequeue" uri="amq:employeequeue"/>
-            <to id="route-to-emptimerecords" uri="restlet:http://simple-emp-timerecords-leanarchdemo.apps.dev.openshift.opentlc.com?restletMethod=get"/>
+            <log id="route-log-4" message="data fetched from employeequeue"/>
+            <to id="route-to-emptimerecords" uri="restlet:http://simple-emp-timerecords-leanarchdemo.apps.dev.openshift.opentlc.com?restletMethod=post"/>
+            <log id="route-log-5" message="data sent to employeetimerecords"/>
             <log id="route-final-log" message="Done processing"/>
         </route>
     </camelContext>
